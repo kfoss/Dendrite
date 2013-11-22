@@ -135,7 +135,7 @@ angular.module('dendrite.controllers', []).
 
         // submit calculation
         $scope.calculate = function() {
-          Analytics.calculate($scope.attr);
+          Analytics.calculate($scope.analyticType, $scope.attr);
         };
     }).
     controller('AnalyticsListCtrl', function($scope, $location, $routeParams, $filter, $q, User, Vertex, Edge, Analytics, Helpers, $timeout) {
@@ -385,6 +385,7 @@ angular.module('dendrite.controllers', []).
 
         $scope.delete = function() {
             Vertex.delete({graphId: $scope.graphId, vertexId: $scope.query.results._id}, function() {
+                console.log('deleting ' + $scope.query.results._id);
                 $location.path('graphs/' + $scope.graphId + '/vertices');
             });
         }
@@ -518,10 +519,12 @@ angular.module('dendrite.controllers', []).
         $scope.query = Vertex.list({graphId: $scope.graphId});
         if ($routeParams.vertexId != undefined) {
           $scope.vertexId = $routeParams.vertexId;
+          $scope.edge = new Edge();
+          $scope.edge._inV = $scope.vertexId;
         }
 
         $scope.save = function() {
-            Edge.save({graphId: $scope.graphId}, $scope.edge, function() {
+            Edge.save({graphId: $scope.graphId, inV: $scope.edge._inV}, $scope.edge, function() {
                 $location.path('graphs/' + $scope.graphId + '/edges');
             });
         };

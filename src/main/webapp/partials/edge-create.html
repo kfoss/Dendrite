@@ -6,14 +6,14 @@
     <div class="col-8">
 
       <div class="form-group">
-        <select class="inline form-control" style="width:45%">
+        <select class="inline form-control" style="width:45%" ng-model="edge._inV">
           <option>Person From</option>
-          <option ng-selected="{{ vertex._id==vertexId }}" ng-model="edge._inV" ng-repeat="vertex in query.results" value="{{ vertex._id }}">{{ vertex.name }}</option>
+          <option ng-selected="{{ vertex._id==vertexId }}" ng-repeat="vertex in query.results" value="{{ vertex._id }}">{{ vertex.name }}</option>
         </select>
 
-        <select class="inline form-control" style="width:45%">
-          <option>Person To</option>
-          <option ng-model="edge._outV" ng-repeat="vertex in query.results" value="{{ vertex._id }}">{{ vertex.name }}</option>
+        <select class="inline form-control" style="width:45%" ng-model="edge._outV">
+          <option ng-selected="true">Person To</option>
+          <option ng-repeat="vertex in query.results" value="{{ vertex._id }}">{{ vertex.name }}</option>
         </select>
       </div>
 
