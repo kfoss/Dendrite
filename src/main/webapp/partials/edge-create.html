@@ -7,7 +7,7 @@
 
       <div class="form-group">
         <select class="inline form-control" style="width:45%" ng-model="edge._inV">
-          <option>Person From</option>
+          <option ng-selected="{{ vertex==undefined }}">Person From</option>
           <option ng-selected="{{ vertex._id==vertexId }}" ng-repeat="vertex in query.results" value="{{ vertex._id }}">{{ vertex.name }}</option>
         </select>
 

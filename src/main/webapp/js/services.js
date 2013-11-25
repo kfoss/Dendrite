@@ -244,6 +244,15 @@ angular.module('dendrite.services', ['ngResource']).
                 url: 'rexster-resource/graphs/:graphId/vertices',
                 method: 'POST'
             },
+            show: {
+                url: 'rexster-resource/graphs/:graphId/vertices/:vertexId',
+                method: 'GET',
+                isArray: false
+            },
+            update: {
+                url: 'rexster-resource/graphs/:graphId/vertices/:vertexId',
+                method: 'PUT'
+            },
             delete: {
                 url: 'rexster-resource/graphs/:graphId/vertices/:vertexId',
                 method: 'DELETE'
@@ -295,8 +304,11 @@ angular.module('dendrite.services', ['ngResource']).
             edgeId: '@_id'
         }, {
             save: {
-                //url: '/graphs/<graph>/edges/3?_outV=<id>&_label=friend&_inV=2&<key>=<key'>',
                 method: 'POST'
+            },
+            update: {
+                url: 'rexster-resource/graphs/:graphId/edges/:edgeId',
+                method: 'PUT'
             },
             delete: {
                 url: 'rexster-resource/graphs/:graphId/edges/:edgeId',
