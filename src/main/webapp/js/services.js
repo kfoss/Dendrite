@@ -255,6 +255,24 @@ angular.module('dendrite.services', ['ngResource']).
           }
         };
     }).
+    factory('History', function($resource, $routeParams, $http, appConfig) {
+        return {
+
+          serverUrl: function() {
+            return "http://"+appConfig.historyServer.host+":"+appConfig.historyServer.port;
+          },
+          createDir: function(projectId) {
+            var url = this.serverUrl() + '/api/git/repo/mkdir/';
+            var json = { path: appConfig.historyServer.storage+'/'+projectId };
+            return $http({
+                method: "POST",
+                url: url,
+                data: JSON.stringify(json)
+            });
+          }
+
+        };
+    }).
     factory('Histogram', function($resource, $routeParams, $http, appConfig) {
       return {
         searchFacets: function(graphId) {
@@ -495,9 +513,10 @@ angular.module('dendrite.services', ['ngResource']).
     }).
     factory('GraphTransform', function($resource, $rootScope, $http, $q, Vertex, Edge) {
         return {
-          saveFile: function(graphId, outputFormat) {
+          saveFile: function(projectId, graphId, outputFormat) {
             var payload = $.param({
-              format: outputFormat
+              format: outputFormat,
+              projectId: projectId
             });
             var config = {
               headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'}

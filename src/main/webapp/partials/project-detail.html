@@ -96,6 +96,9 @@
             <li ng-if="graphResult._id != graphId"><a href="#/graphs/{{ graphResult._id }}"><strong>{{ graphResult._id }}</strong></a></li>
           </ul>
         </div>
+        <div ng-if="historyEnabled">
+          <a href="#/projects/{{ projectId }}/history" class="btn btn-primary">History</a>
+        </div>
     </div>
   </div>
 

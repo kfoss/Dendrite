@@ -88,19 +88,22 @@ angular.module('dendrite.controllers', []).
           $location.path('projects/'+id);
         };
     }).
-    controller('ProjectCreateCtrl', function($rootScope, $scope, $location, User, Project) {
+    controller('ProjectCreateCtrl', function($rootScope, $scope, $location, User, Project, History) {
         $scope.User = User;
         $scope.save = function() {
             Project.save({}, $scope.project)
                     .$then(function(response) {
                       var project = response.data.project;
                       $rootScope.$broadcast('event:reloadProjectNeeded');
+                      History.createDir(project._id);
                       $location.path('projects/' + project._id);
                     });
         };
     }).
-    controller('ProjectDetailCtrl', function($rootScope, $scope, $routeParams, $location, $q, Project, Graph, GraphTransform) {
+    controller('ProjectDetailCtrl', function($rootScope, $scope, $routeParams, $location, appConfig, $q, Project, Graph, GraphTransform) {
         $scope.projectId = $routeParams.projectId;
+        $scope.historyEnabled = appConfig.historyServer.enabled;
+
         Project.query({projectId: $routeParams.projectId})
                 .$then(function(response) {
                     $scope.project = response.data.project;
@@ -149,7 +152,7 @@ angular.module('dendrite.controllers', []).
 
         $scope.saveFile = function() {
             $scope.fileSaving = true;
-            GraphTransform.saveFile($scope.graphId, this.format)
+            GraphTransform.saveFile($scope.projectId, $scope.graphId, this.format)
                 .success(function(){
                     $scope.fileSaving = false;
                     $scope.fileSaved = true;
@@ -875,4 +878,15 @@ angular.module('dendrite.controllers', []).
               };
           }
       });
+    }).
+    controller('HistoryDetailCtrl', function($scope, $routeParams, appConfig, Project, History) {
+      $scope.projectId = $routeParams.projectId;
+      $scope.queryProject = Project.query({projectId: $scope.projectId});
+
+      // construct path to project history
+      var config = appConfig.historyServer;
+      var graphHistoryPath = config.storage + "/" + $scope.projectId;
+      console.log(History.serverUrl() + "/#/repository?path="+encodeURIComponent(graphHistoryPath));
+
+      $scope.historyUrl = History.serverUrl() + "/#/repository?path="+encodeURIComponent(graphHistoryPath);
     });
