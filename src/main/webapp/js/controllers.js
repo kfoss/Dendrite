@@ -237,7 +237,7 @@ angular.module('dendrite.controllers', []).
       $scope.queryStyle = "vertices";
       $scope.vertexFrom = "";
 
-      $scope.followEdges = function(element) {
+      $scope.followEdges = function() {
         $routeParams.mode = "edge";
         $scope.queryStyle = "edges";
         $scope.refresh();
@@ -540,9 +540,10 @@ angular.module('dendrite.controllers', []).
         $scope.graphId = $routeParams.graphId;
 
         $scope.save = function() {
-            Vertex.save({graphId: $scope.graphId}, $scope.vertex, function() {
-                $location.path('graphs/' + $scope.graphId + '/vertices');
-            });
+            Vertex.save({graphId: $scope.graphId}, $scope.vertex)
+                  .$then(function(data) {
+                    $location.path('graphs/' + $scope.graphId + '/vertices');
+                  });
         };
     }).
     controller('VertexEditCtrl', function($scope, $routeParams, $location, User, Vertex) {
@@ -556,9 +557,10 @@ angular.module('dendrite.controllers', []).
                 });
 
         $scope.save = function() {
-            Vertex.update({graphId: $scope.graphId, vertexId: $scope.vertexId}, $scope.vertex, function() {
-                $location.path('graphs/' + $scope.graphId + '/vertices');
-            });
+            Vertex.update({graphId: $scope.graphId, vertexId: $scope.vertexId}, $scope.vertex)
+                  .$then(function(data) {
+                    $location.path('graphs/' + $scope.graphId + '/vertices');
+                  });
         };
     }).
     controller('EdgeListCtrl', function($scope, $location, $routeParams, $filter, User, Edge, Vertex) {
@@ -716,9 +718,10 @@ angular.module('dendrite.controllers', []).
         }
 
         $scope.save = function() {
-            Edge.save({graphId: $scope.graphId, inV: $scope.edge._inV}, $scope.edge, function() {
-                $location.path('graphs/' + $scope.graphId + '/edges');
-            });
+            Edge.save({graphId: $scope.graphId, inV: $scope.edge._inV}, $scope.edge)
+                .$then(function(data) {
+                  $location.path('graphs/' + $scope.graphId + '/edges');
+                });
         };
     }).
     controller('EdgeEditCtrl', function($scope, $routeParams, $location, User, Edge, Vertex) {
