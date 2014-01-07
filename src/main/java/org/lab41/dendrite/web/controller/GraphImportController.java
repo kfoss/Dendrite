@@ -22,6 +22,9 @@ import com.tinkerpop.blueprints.util.io.gml.GMLReader;
 import com.tinkerpop.blueprints.util.io.graphml.GraphMLReader;
 import com.tinkerpop.blueprints.util.io.graphson.GraphSONReader;
 
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Vertex;
+
 import org.lab41.dendrite.graph.DendriteGraph;
 import org.lab41.dendrite.models.GraphMetadata;
 import org.lab41.dendrite.rexster.DendriteRexsterApplication;
@@ -46,6 +49,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Arrays;
 
 @Controller
 public class GraphImportController {
@@ -69,10 +73,12 @@ public class GraphImportController {
         }
 
         String format = item.getFormat();
+        String searchkeys = item.getSearchkeys();
         CommonsMultipartFile file = item.getFile();
 
         logger.debug("receiving file:", file.getOriginalFilename());
         logger.debug("file format:", format);
+        logger.debug("search keys: "+searchkeys);
 
         DendriteGraph graph = metadataService.getGraph(graphId);
         if (graph == null) {
@@ -82,6 +88,25 @@ public class GraphImportController {
         }
 
         try {
+
+            // create search indices
+            TitanGraph titanGraph = graph.getTitanGraph();
+            String elasticSearchIndex = "search";
+            String[] reservedKeys = {"id", "_id"};
+            if (titanGraph != null && searchkeys.indexOf(",") != -1) {
+
+              // separate "k1,k2,k3" into ["k1", "k2", "k3"] and iterate
+              String[] searchKeysArray = searchkeys.split(",");
+              for(int i = 0; i<searchKeysArray.length; i++) {
+
+                // create the search index (if it doesn't already exist and isn't a reserved key)
+                if (titanGraph.getType(searchKeysArray[i]) == null && !Arrays.asList(reservedKeys).contains(searchKeysArray[i])) {
+                  titanGraph.makeKey(searchKeysArray[i]).dataType(String.class).indexed(Vertex.class).indexed(elasticSearchIndex, Vertex.class).make();
+                }
+
+              }
+            }
+
             InputStream inputStream = file.getInputStream();
             if (format.equalsIgnoreCase("GraphSON")) {
                 GraphSONReader.inputGraph(graph, inputStream);
