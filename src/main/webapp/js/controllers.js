@@ -1263,23 +1263,15 @@ angular.module('dendrite.controllers', []).
         };
 
         // push/slice checkbox from list
-        $scope.keys = {vertices: [], edges: []};
-        $scope.selectedKeys = [];
-
-        $scope.toggleSelection = function(key, keytype) {
-            var idx = $scope.selectedKeys[keytype].indexOf(key);
-
-            if (idx > -1) {
-                $scope.selectedKeys[keytype].splice(idx, 1);
-            } else {
-                $scope.selectedKeys[keytype].push(key);
-            }
+        $scope.selectedKeys = {vertices: [], edges: []};
+        $scope.toggleSelection = function(key) {
+            key.selected = !key.selected;
         }
 
         var restrictedKeys = ["_id", "id", "_type", "_outV", "_inV", "source", "target", "blueprintsId"];
 
         $scope.$on('event:graphFileParsed', function() {
-          $scope.keys = {vertices: [], edges: []};
+          $scope.selectedKeys = {vertices: [], edges: []};
           if (!appConfig.fileUpload.parseGraphFile) {
             $scope.safeApply(function() {
               $scope.fileParsed = true;
@@ -1292,22 +1284,27 @@ angular.module('dendrite.controllers', []).
               $scope.fileParseError = false;
               $scope.keysForGraph.vertices.forEach(function(k) {
                   if (restrictedKeys.indexOf(k) == -1) {
-                      $scope.keys.vertices.push({
+                      $scope.selectedKeys.vertices.push({
                           name: k,
-                          type: $scope.indexTypes[0]
+                          type: $scope.indexTypes[0],
+                          selected: true
                       });
                   }
               });
               $scope.keysForGraph.edges.forEach(function(k) {
                   if (restrictedKeys.indexOf(k) == -1) {
-                      $scope.keys.edges.push({
+                      $scope.selectedKeys.edges.push({
                           name: k,
-                          type: $scope.indexTypes[0]
+                          type: $scope.indexTypes[0],
+                          selected: true
                       });
                   }
               });
 
-              $scope.selectedKeys = $scope.keys;
+              $scope.keyIsChecked = function(key) {
+                return key.selected;
+              };
+
               $scope.safeApply(function() {
                 $modal({
                   scope: $scope,
@@ -1330,9 +1327,22 @@ angular.module('dendrite.controllers', []).
           // See fixme above.
           $scope.actuallyUploading = true;
 
-          // build the list of key-val pairs
-          var selectedKeysJson = JSON.stringify($scope.selectedKeys);
-          angular.element('#form-file-upload input[name="searchkeys"]').val(selectedKeysJson);
+          // build the list of selected key-val pairs and embed as form input value
+          $scope.selectedKeys.vertices  = $scope.selectedKeys.vertices
+                                            .filter(function(obj) {
+                                                if (obj.selected) {
+                                                  delete obj.selected;
+                                                  return obj;
+                                                }
+                                            });
+          $scope.selectedKeys.edges     = $scope.selectedKeys.edges
+                                            .filter(function(obj) {
+                                                if (obj.selected) {
+                                                  delete obj.selected;
+                                                  return obj;
+                                                }
+                                            });
+          angular.element('#form-file-upload input[name="searchkeys"]').val(JSON.stringify($scope.selectedKeys));
 
           $scope.safeApply(function() {
             angular.element('#form-file-upload').submit();
