@@ -23,6 +23,7 @@
 @import "panels.css.less";
 @import "ng-grid.css.less";
 @import "bootstrap-tour.css.less";
+@import "viz.css.less";
 
 // fonts
 @import url("http://fonts.googleapis.com/css?family=Syncopate:400,700|Oxygen");
@@ -55,8 +56,9 @@
 @color-btn-default-end:           @color-gray-dark;
 @color-btn-default-hsv:           hsla(hue(@color-btn-default-end), saturation(@color-btn-default-end), lightness(@color-btn-default-end), @btn-hsl-alpha);
 @color-btn-transparent:           @color-gray-dark;
-@color-btn-nostyle:               @color-blue-light;      
+@color-btn-nostyle:               @color-blue-light;
 
+@color-title-dark:                @color-red-dark;
 @color-heading-light:             @color-blue-dark;
 @color-heading-dark:              @color-navy-dark;
 
@@ -64,7 +66,7 @@
 @color-navbar-to:                 @color-black-light;
 @color-navbar-primary:            @color-white-dark;
 @color-navbar-secondary:          @color-orange-dark;
-@color-navbar-caret-select:       @color-green-light;                
+@color-navbar-caret-select:       @color-green-light;
 
 @color-page-background-mysql:     @color-red-light;
 @color-page-background-mongo:     @color-yellow-light;
@@ -328,12 +330,12 @@ line.link {
 
 .jumbotron {
   h1,h2,h3,h4,h5,h6 {
-    color: @color-emphasis;
+    color: @color-title-dark;
   }
 }
 
 h1,h2,h3,h4,h5,h6 {
-  color: @color-emphasis;
+  color: @color-title-dark;
   small {
     color: @color-typ-small;
   }
@@ -390,7 +392,7 @@ body {
 }
 
 .content {
-  background-color: @color-background-stage;
+  background-color: fade(@color-background-stage, 75%);
   padding: 40px;
   margin: 0 -20px; /* negative indent the amount of the padding to maintain the grid system */
   .rounded-corner;
@@ -625,6 +627,90 @@ div.span6 div.span6 div.dataTables_length label {
 
 .ui-widget-content a {
   color: @color-ui-content;
+}
+
+.nav-tabs {
+  border-bottom: 1px dotted darken(@color-white-dark, 5%);
+}
+
+.nav-tabs,
+#tabs-content {
+  margin-bottom: 0;
+}
+
+.tabs-vertical {
+  .nav-tabs {
+
+    border-bottom: none;
+    .gradient(fade(@color-white-dark, 30%), transparent);
+    min-height: 300px;
+/*    background: rgba(0,0,0,0.1);*/
+/*    border-right: 1px solid #ddd;*/
+
+
+    li {
+      float: none;
+
+      a {
+        .rounded-corner(3px);
+
+        &:hover,
+        &:focus {
+          border-right: 1px dotted @color-white-dark;
+          border-left: 1px dotted @color-white-dark;
+          border-top: 1px dotted transparent;
+          border-bottom: 1px dotted transparent;
+        }
+      }
+
+      &.active > a {
+        background: transparent;
+        border-left: 2px solid @color-white-dark;
+        border-bottom: 2px solid transparent;
+        border-right: 2px solid @color-white-dark;
+        border-top: 2px solid transparent;
+
+        &:hover,
+        &:focus {
+          background: transparent;
+        }
+      }
+
+    }
+  }
+
+/*  .nav-tabs {*/
+  #tabs-content {
+    padding-top: 10px;
+  }
+
+}
+
+
+.nav-tabs > li{
+  &.active > a {
+    background: @color-white-dark;
+    &:hover,
+    &:focus {
+      background: @color-white-dark;
+    }
+  }
+
+  >a {
+    background-color: transparent;
+    border: 1px dotted transparent;
+    color: @color-blue-dark;
+    margin-right: 0;
+  }
+
+  >a:focus,
+  >a:hover {
+/*    color: #555555;*/
+    cursor: pointer;
+    background: transparent;
+    border: 1px dotted @color-white-dark;
+/*    border-bottom-color: transparent;*/
+  }
 }
 
 
