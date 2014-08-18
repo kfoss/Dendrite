@@ -319,6 +319,30 @@ angular.module('dendrite.directives', [])
           // alert app to data completion
           $rootScope.$broadcast('event:reloadGraph');
         }
+       }
+     };
+   }])
+  .directive('forceDirectedGraphServerSide', ['$rootScope', '$http', '$q', '$compile', 'GraphTransform', function($rootScope, $http, $q, $compile, GraphTransform) {
+    return {
+      restrict: 'A',
+      transclude: true,
+      replace: true,
+      link: function($scope, element, attrs) {
+
+        $scope.$watch('networkVizServerSide', function(data) {
+          if (data) {
+            element.html($compile(data)($scope));
+          }
+          else {
+            var template = '<img src="img/icons/ajax-loader.gif">';
+            element.html($compile(template)($scope));
+          }
+//          console.log('watch networkVizServerSide = ', data);
+//          if ((data)) {
+////            element.$compile($rootScope.networkVizServerSide = GraphTransform.getNetworkViz($scope.graphId);
+//            element.html($compile(data)($scope));
+//          }
+        });
       }
     };
   }])
