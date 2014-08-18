@@ -1,7 +1,15 @@
-<h5>D3.js Graph Visualization</h5>
-<p>Get a quick feel for the network structure structure (visualized with <a href="http://d3js.org" target="_blank">D3.js</a>).  You can also hover over each vertex to get the name of each person:</p>
-<div id="forceDirectedGraph" class="col-sm-8" align="center">
-  <svg force-directed-graph data="forceDirectedGraphData"></svg>
-</div>
+<div ng-init="d3VizType='client'">
+  <h5>D3.js Graph Visualization</h5>
+  <p>Get a quick feel for the network structure structure (visualized with <a href="http://d3js.org" target="_blank">D3.js</a>).  You can also hover over each vertex to get the name of each person:</p>
 
-<div force-directed-graph-server-side class="img-max-50p margin-auto-left-right"></div>
+  <label><small>Client-side (dynamic) rendering <input type="radio" ng-model="d3VizType" value="client"></small></label>
+  <label><small>Server-side (static) rendering <input type="radio" ng-model="d3VizType" value="server"></small></label>
+
+  <div id="forceDirectedGraph" align="center" ng-show="d3VizType=='client'">
+    <svg force-directed-graph data="forceDirectedGraphData"></svg>
+  </div>
+
+  <div ng-show="d3VizType=='server'">
+    <div force-directed-graph-server-side class="img-max-50p margin-auto-left-right"></div>
+  </div>
+</div>
