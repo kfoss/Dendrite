@@ -72,14 +72,29 @@ angular.module('dendrite.controllers', []).
           });
       };
     }).
-    controller('ProjectListCtrl', function($scope, $modal, $location, User, Project) {
+    controller('ProjectListCtrl', function($scope, $modal, $location, User, Project, GraphTransform) {
         $scope.User = User;
         $scope.query = Project.index();
+
+        $scope.projectImages = {};
+        $scope.query
+              .$then(function(dataProjects) {
+                var project,
+                    projects = dataProjects.data.projects;
+                for (var i=0; i<projects.length; ++i) {
+                  project = projects[i];
+                  $scope.projectImages[project._id] = GraphTransform.getNetworkViz(project._id, project.current_graph);
+                }
+              });
 
         // update list of current projects (for create/delete functions)
         $scope.$on('event:reloadProjectNeeded', function() {
           $scope.query = Project.index();
         });
+
+        $scope.viewThumbnail = function(projectId) {
+          return $scope.projectImages[projectId];
+        };
 
         $scope.createProject = function() {
           $location.path('projects/create');
