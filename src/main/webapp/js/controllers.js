@@ -112,12 +112,13 @@ angular.module('dendrite.controllers', []).
                     });
         };
     }).
-    controller('ProjectDetailCtrl', function($rootScope, $modal, $scope, $timeout, $routeParams, $route, $location, $q, appConfig, Project, Graph, GraphTransform) {
+    controller('ProjectDetailCtrl', function($rootScope, $modal, $scope, $http, $timeout, $routeParams, $route, $location, $q, appConfig, Project, Graph, GraphTransform, ServerViz) {
         $rootScope.projectId = $routeParams.projectId;
         $scope.showExploreContext = function(val){
           $scope.toggle = val;
           return val;
         };
+
         $scope.panelFullScreen = function(title, url) {
           $scope.modalUrl = url;
           $scope.modalTitle = title;
@@ -154,6 +155,21 @@ angular.module('dendrite.controllers', []).
                     $scope.projectName = response.data.project.name;
                 });
 
+        $scope.$on('event:graphFileImported', function() {
+          $rootScope.$broadcast('event:graphStructureChanged');
+        });
+
+        // tripwire to reload current graph
+        $scope.$on('event:graphStructureChanged', function() {
+          $scope.safeApply(function() {
+            $rootScope.networkVizServerSide = undefined;
+            GraphTransform.saveNetworkViz($scope.projectId, $scope.graphId)
+                          .then(function(responseSave) {
+                              $rootScope.networkVizServerSide = GraphTransform.getNetworkViz($scope.projectId, $scope.graphId);
+                          });
+          });
+        });
+
         // tripwire to reload current graph
         $rootScope.graphLoaded = false;
         $scope.$on('event:reloadGraph', function() {
@@ -165,6 +181,9 @@ angular.module('dendrite.controllers', []).
             $scope.sigmajsGraphData = GraphTransform.reloadSigmaGraph($scope.graphId);
           }
         });
+
+        // get the server-side generated image
+        $rootScope.networkVizServerSide = GraphTransform.getNetworkViz($scope.projectId, $scope.graphId);
 
         // get the projects branches
         $scope.$on('event:reloadProjectNeeded', function() {
@@ -695,6 +714,7 @@ angular.module('dendrite.controllers', []).
           $scope.selectedItems.map(function(vertex) {
             var deferred = $q.defer();
             Vertex.delete({graphId: $scope.graphId, vertexId: vertex._id}, function() {
+              $rootScope.$broadcast('event:graphStructureChanged');
               deferred.resolve();
             }, function() {
               deferred.reject();
@@ -992,7 +1012,7 @@ angular.module('dendrite.controllers', []).
 
         $scope.delete = function() {
             Vertex.delete({graphId: $scope.graphId, vertexId: $scope.query.results._id}, function() {
-                //TODO: Show something after delete
+                $rootScope.$broadcast('event:graphStructureChanged');
             });
         }
     }).
@@ -1002,6 +1022,7 @@ angular.module('dendrite.controllers', []).
             Vertex.save({graphId: $scope.graphId}, $scope.vertex)
                   .$then(function(data) {
                     ElasticSearch.verifyId($scope.graphId, data.data.results._id, "vertex");
+                    $rootScope.$broadcast('event:graphStructureChanged');
                   });
         };
     }).
@@ -1049,6 +1070,7 @@ angular.module('dendrite.controllers', []).
           $scope.selectedItems.map(function(edge) {
             var deferred = $q.defer();
             Edge.delete({graphId: $scope.graphId, edgeId: edge._id}, function() {
+              $rootScope.$broadcast('event:graphStructureChanged');
               deferred.resolve();
             }, function() {
               deferred.reject();
@@ -1315,6 +1337,7 @@ angular.module('dendrite.controllers', []).
 
     }).
     controller('EdgeDetailCtrl', function($rootScope, $scope, $routeParams, $location, Edge, Vertex) {
+        $scope.graphId = $routeParams.graphId;
         $scope.edgeId = $routeParams.edgeId;
 
         // retrieve the edge and both vertices
@@ -1328,6 +1351,7 @@ angular.module('dendrite.controllers', []).
         $scope.delete = function() {
             Edge.delete({graphId: $scope.graphId, edgeId: $scope.edgeId}, function() {
                 $rootScope.$broadcast('event:reloadProjectNeeded');
+                $rootScope.$broadcast('event:graphStructureChanged');
             });
         }
     }).
@@ -1344,6 +1368,7 @@ angular.module('dendrite.controllers', []).
             Edge.save({graphId: $scope.graphId, inV: $scope.edge._inV}, $scope.edge)
                 .$then(function(data) {
                   ElasticSearch.verifyId($scope.graphId, data.data.results._id, "edge");
+                  $rootScope.$broadcast('event:graphStructureChanged');
                 });
         };
     }).
