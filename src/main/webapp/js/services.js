@@ -948,6 +948,18 @@ angular.module('dendrite.services', ['ngResource']).
             }
         });
     }).
+    factory('ServerViz', function($resource) {
+        return $resource('http://localhost:3000/api/graph/save', {
+            projectId: '@id'
+        }, {
+            networkSave: {
+                url: 'http://localhost:3000/api/graph/save',
+                method: 'POST',
+                isArray: false
+            },
+            networkSaveUrl: 'http://localhost:3000/api/graph/save'
+        });
+    }).
     factory('Branch', function($resource) {
         return $resource('api/branches/:branchId', {
             branchId: '@id'
@@ -1023,6 +1035,86 @@ angular.module('dendrite.services', ['ngResource']).
             };
 
             return $http.post('api/graphs/'+graphId+'/file-save', payload, config);
+          },
+          saveNetworkViz: function(projectId, graphId) {
+            var self = this;
+
+            var filePath = '/tmp/'+projectId+'.svg';
+            var config = {
+              headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'}
+            };
+            var dataForServer = self.reloadRandomGraph(graphId);
+            return $q.all([
+                dataForServer.vertices.promise,
+                dataForServer.edges.promise
+              ])
+              .then(function(data) {
+                  if (data[0].length && data[1].length) {
+                    var vertices = data[0];
+                    var edges = data[1];
+
+                    var nodes = vertices.map(function(vertex) {
+                      return {
+                        _id: vertex._id,
+                        name: vertex.name
+                      };
+                    });
+
+                    var vertexToNode = {};
+                    vertices.forEach(function(vertex, idx) {
+                      vertexToNode[vertex._id] = idx;
+                    })
+
+                    var links = edges.map(function(edge) {
+                      return {
+                        _id: edge._id,
+                        source: vertexToNode[edge._inV],
+                        target: vertexToNode[edge._outV]
+                      };
+                    });
+
+                    var params =  {
+                      width: 700,
+                      height: 700,
+                      filePath: filePath,
+                      graphData: {nodes: nodes, links: links}
+                    };
+
+                    return $http.post('http://localhost:3000/api/graph/save', params, config);
+                  }
+                  else {
+                    return $q.reject('Graph data missing');
+                  }
+              });
+          },
+          getNetworkViz: function(projectId, graphId) {
+            var self = this;
+            var filePath = '/tmp/'+projectId+'.svg';
+            var config = {
+              headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'}
+            };
+            var params = {filePath: filePath};
+            return $http.post('http://localhost:3000/api/graph/retrieve', params, config)
+                 .then(function(responseRetrieve) {
+                      return responseRetrieve.data;
+                 }, function(error) {
+                      if (error.status !== 404) {
+                        $rootScope.projectMsgError = error.data.msg;
+                      }
+                      else {
+                        return self.saveNetworkViz(projectId, graphId)
+                                    .then(function(response) {
+                                        params = {filePath: filePath};
+                                        return $http.post('http://localhost:3000/api/graph/retrieve', params, config)
+                                             .then(function(responseRetrieve) {
+                                                return responseRetrieve.data;
+                                             });
+                                    },
+                                    function(error) {
+                                      return '<img class="logo" src="public/img/logo.png" height="30" width="30">';
+                                    });
+                      }
+                 });
           },
           reloadGraph: function(graphId) {
             var forceDirectedGraphData = {
