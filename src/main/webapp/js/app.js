@@ -136,6 +136,10 @@ angular.module('dendrite', [
         storage: "/tmp/dendrite/history",
         defaultFileFormat: 'GraphSON'
     },
+    imageServer: {
+        imageServerHost: 'localhost',
+        imageServerPort: 3000
+    },
     branches: {
       metadata: {
         pollTimeout: 5 * 1000

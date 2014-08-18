@@ -948,16 +948,16 @@ angular.module('dendrite.services', ['ngResource']).
             }
         });
     }).
-    factory('ServerViz', function($resource) {
-        return $resource('http://localhost:3000/api/graph/save', {
+    factory('ServerViz', function($resource, appConfig) {
+        return $resource('http://'+appConfig.imageServer.imageServerHost+':'+appConfig.imageServer.imageServerPort+'/api/graph/save', {
             projectId: '@id'
         }, {
             networkSave: {
-                url: 'http://localhost:3000/api/graph/save',
+                url: 'http://'+appConfig.imageServer.imageServerHost+':'+appConfig.imageServer.imageServerPort+'/api/graph/save',
                 method: 'POST',
                 isArray: false
             },
-            networkSaveUrl: 'http://localhost:3000/api/graph/save'
+            networkSaveUrl: 'http://'+appConfig.imageServer.imageServerHost+':'+appConfig.imageServer.imageServerPort+'/api/graph/save'
         });
     }).
     factory('Branch', function($resource) {
@@ -1023,7 +1023,7 @@ angular.module('dendrite.services', ['ngResource']).
 
         };
     }).
-    factory('GraphTransform', function($resource, $rootScope, $http, $q, Vertex, Edge) {
+    factory('GraphTransform', function($resource, $rootScope, $http, $q, Vertex, Edge, appConfig) {
         return {
           saveFile: function(graphId, projectId, outputFormat) {
             var payload = $.param({
@@ -1038,7 +1038,7 @@ angular.module('dendrite.services', ['ngResource']).
           },
           saveNetworkViz: function(projectId, graphId) {
             var self = this;
-
+            var urlSave = 'http://'+appConfig.imageServer.imageServerHost+':'+appConfig.imageServer.imageServerPort+'/api/graph/save';
             var filePath = '/tmp/'+projectId+'.svg';
             var config = {
               headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'}
@@ -1080,7 +1080,7 @@ angular.module('dendrite.services', ['ngResource']).
                       graphData: {nodes: nodes, links: links}
                     };
 
-                    return $http.post('http://localhost:3000/api/graph/save', params, config);
+                    return $http.post(urlSave, params, config);
                   }
                   else {
                     return $q.reject('Graph data missing');
@@ -1090,11 +1090,12 @@ angular.module('dendrite.services', ['ngResource']).
           getNetworkViz: function(projectId, graphId) {
             var self = this;
             var filePath = '/tmp/'+projectId+'.svg';
+            var urlRetrieve = 'http://'+appConfig.imageServer.imageServerHost+':'+appConfig.imageServer.imageServerPort+'/api/graph/retrieve';
             var config = {
               headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'}
             };
             var params = {filePath: filePath};
-            return $http.post('http://localhost:3000/api/graph/retrieve', params, config)
+            return $http.post(urlRetrieve, params, config)
                  .then(function(responseRetrieve) {
                       return responseRetrieve.data;
                  }, function(error) {
@@ -1105,7 +1106,7 @@ angular.module('dendrite.services', ['ngResource']).
                         return self.saveNetworkViz(projectId, graphId)
                                     .then(function(response) {
                                         params = {filePath: filePath};
-                                        return $http.post('http://localhost:3000/api/graph/retrieve', params, config)
+                                        return $http.post(urlRetrieve, params, config)
                                              .then(function(responseRetrieve) {
                                                 return responseRetrieve.data;
                                              });
