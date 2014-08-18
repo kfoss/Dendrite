@@ -173,6 +173,14 @@
 /*************************************************/
 /* images */
 /*************************************************/
+.img-max-50 { max-height: 50px; max-width: 50px; }
+.img-max-50p { max-height: 50%; max-width: 50%; }
+
+.img-max-100 { max-height: 100px; max-width: 100px; }
+.img-max-100p { max-height: 100%; max-width: 100%; }
+
+.img-max-200 { max-height: 200px; max-width: 200px; }
+
 .logo {
   padding: 5px 0;
 }
@@ -231,7 +239,7 @@
 
 .card {
   .rounded-corner(3px);
-  height: 125px;
+  height: 175px;
   border-bottom: 3px solid transparent;
   .align-center;
   background: darken(@color-background-stage, 10%);
@@ -592,7 +600,10 @@ body {
 .margin-bottom-none { margin-bottom: 0 ! important;}
 .margin-top-large { margin-top: @spacing-large;}
 .margin-none { margin: 0;}
-
+.margin-auto-left-right {
+  margin-left: auto;
+  margin-right: auto;
+}
 /*************************************************/
 /* forms */
 /*************************************************/
